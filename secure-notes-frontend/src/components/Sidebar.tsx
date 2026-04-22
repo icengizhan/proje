@@ -11,11 +11,13 @@ interface SidebarProps {
   onLogout: () => void;
   isDark: boolean;
   onToggleTheme: () => void;
+  onMoveNoteToFolder: (noteId: number, folderId: number) => void;
 }
 
-export default function Sidebar({ activeTab, setActiveTab, folders, onAddFolder, onDeleteFolder, onLogout, isDark, onToggleTheme }: SidebarProps) {
+export default function Sidebar({ activeTab, setActiveTab, folders, onAddFolder, onDeleteFolder, onLogout, isDark, onToggleTheme, onMoveNoteToFolder }: SidebarProps) {
   const [isAddingFolder, setIsAddingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
+  const [draggedOverFolderId, setDraggedOverFolderId] = useState<number | null>(null);
 
   const handleAddFolder = (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,31 +81,44 @@ export default function Sidebar({ activeTab, setActiveTab, folders, onAddFolder,
         <div>
           <h3 className="px-3 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Klasörler</h3>
           <nav className="space-y-1">
-            {folders.map(folder => (
-              <div 
-                key={folder.id}
-                className="group flex items-center"
-              >
-                <button
-                  onClick={() => setActiveTab(`folder_${folder.id}`)}
-                  className={`flex-1 flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
-                    activeTab === `folder_${folder.id}` 
-                      ? 'bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 shadow-sm ring-1 ring-blue-200 dark:ring-blue-800' 
-                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
-                  }`}
+            {folders.map(folder => {
+              const isDragOver = draggedOverFolderId === folder.id;
+              return (
+                <div 
+                  key={folder.id}
+                  className="group flex items-center"
+                  onDragOver={(e) => { e.preventDefault(); setDraggedOverFolderId(folder.id); }}
+                  onDragLeave={() => setDraggedOverFolderId(null)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDraggedOverFolderId(null);
+                    const noteId = e.dataTransfer.getData('noteId');
+                    if (noteId) {
+                      onMoveNoteToFolder(parseInt(noteId), folder.id);
+                    }
+                  }}
                 >
-                  <FolderIcon className="w-4 h-4 text-blue-400" />
-                  <span className="truncate">{folder.name}</span>
-                </button>
-                <button
-                  onClick={(e) => handleDeleteFolder(e, folder.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1.5 ml-1 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-all duration-200"
-                  title="Klasörü Sil"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
+                  <button
+                    onClick={() => setActiveTab(`folder_${folder.id}`)}
+                    className={`flex-1 flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
+                      activeTab === `folder_${folder.id}` 
+                        ? 'bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 shadow-sm ring-1 ring-blue-200 dark:ring-blue-800' 
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
+                    } ${isDragOver ? 'ring-2 ring-blue-400 bg-blue-50 dark:bg-blue-900/40 transform scale-[1.02]' : ''}`}
+                  >
+                    <FolderIcon className={`w-4 h-4 ${isDragOver ? 'text-blue-500 animate-pulse' : 'text-blue-400'}`} />
+                    <span className="truncate">{folder.name}</span>
+                  </button>
+                  <button
+                    onClick={(e) => handleDeleteFolder(e, folder.id)}
+                    className="opacity-0 group-hover:opacity-100 p-1.5 ml-1 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-all duration-200"
+                    title="Klasörü Sil"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              );
+            })}
 
             {isAddingFolder ? (
               <form onSubmit={handleAddFolder} className="px-3 mt-2">

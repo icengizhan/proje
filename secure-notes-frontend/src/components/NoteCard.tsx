@@ -8,9 +8,10 @@ interface NoteCardProps {
   onTogglePin?: (id: number) => void;
   onToggleFavorite?: (id: number) => void;
   onLinkClick?: (linkName: string) => void;
+  folderName?: string;
 }
 
-export default function NoteCard({ note, isActive, onClick, onTogglePin, onToggleFavorite, onLinkClick }: NoteCardProps) {
+export default function NoteCard({ note, isActive, onClick, onTogglePin, onToggleFavorite, onLinkClick, folderName }: NoteCardProps) {
   const renderPreview = (content: string) => {
     const truncated = content.length > 80 ? content.slice(0, 80) + '...' : content;
     const parts = truncated.split(/(\[\[.*?\]\])/g);
@@ -35,6 +36,8 @@ export default function NoteCard({ note, isActive, onClick, onTogglePin, onToggl
   return (
     <div 
       onClick={onClick}
+      draggable={true}
+      onDragStart={(e) => e.dataTransfer.setData('noteId', note.id.toString())}
       className={`relative flex flex-col p-5 bg-white dark:bg-[#1e1e1e] rounded-2xl cursor-pointer transition-all duration-300 overflow-hidden ${
         isActive 
           ? 'ring-2 ring-blue-500 shadow-md scale-[1.02]' 
@@ -69,7 +72,14 @@ export default function NoteCard({ note, isActive, onClick, onTogglePin, onToggl
       </div>
 
       <div className="mt-4 flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 font-medium">
-        <span>{note.date}</span>
+        <div className="flex items-center gap-2">
+          <span>{note.date}</span>
+          {folderName && (
+            <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase border border-blue-100 dark:border-blue-800/50">
+              {folderName}
+            </span>
+          )}
+        </div>
         {note.paperColor !== 'white' && (
           <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: note.paperColor === 'yellow' ? '#fde047' : '#e5e7eb' }}></span>
         )}

@@ -159,6 +159,16 @@ export default function Dashboard() {
     if (activeNoteId === id) setActiveNoteId(null);
   };
 
+  const handleMoveNoteToFolder = async (noteId: number, folderId: number) => {
+    try {
+      setNotes(prev => prev.map(n => n.id === noteId ? { ...n, folderId } : n));
+      await api.patch(`/notes/${noteId}`, { folderId });
+    } catch (err) {
+      console.error("Not taşınırken hata:", err);
+      alert("Not taşınırken bir hata oluştu.");
+    }
+  };
+
   const handleWikiLink = (linkName: string) => {
     const targetNote = notes.find(n => n.title.toLowerCase() === linkName.toLowerCase());
     if (targetNote) {
@@ -219,6 +229,7 @@ export default function Dashboard() {
           onLogout={handleLogout}
           isDark={isDark}
           onToggleTheme={toggleTheme}
+          onMoveNoteToFolder={handleMoveNoteToFolder}
         />
       </div>
 
@@ -277,17 +288,21 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
-              {sortedNotes.map(note => (
-                <NoteCard 
-                  key={note.id} 
-                  note={note} 
-                  isActive={activeNote?.id === note.id}
-                  onClick={() => setActiveNoteId(note.id)}
-                  onTogglePin={() => togglePin(note.id)}
-                  onToggleFavorite={() => toggleFavorite(note.id)}
-                  onLinkClick={handleWikiLink}
-                />
-              ))}
+              {sortedNotes.map(note => {
+                const folderName = folders.find(f => f.id === note.folderId)?.name;
+                return (
+                  <NoteCard 
+                    key={note.id} 
+                    note={note} 
+                    isActive={activeNote?.id === note.id}
+                    onClick={() => setActiveNoteId(note.id)}
+                    onTogglePin={() => togglePin(note.id)}
+                    onToggleFavorite={() => toggleFavorite(note.id)}
+                    onLinkClick={handleWikiLink}
+                    folderName={folderName}
+                  />
+                );
+              })}
             </div>
           )}
         </div>
