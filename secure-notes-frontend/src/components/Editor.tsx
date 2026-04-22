@@ -291,6 +291,12 @@ export default function Editor({ note, onUpdate, onDeletePermanently, onRestore,
               placeholder="Not Başlığı..."
               value={note.title}
               onChange={(e) => onUpdate({ ...note, title: e.target.value })}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  textareaRef.current?.focus();
+                }
+              }}
               readOnly={isPreview}
             />
           </div>
