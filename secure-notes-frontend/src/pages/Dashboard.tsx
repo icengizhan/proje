@@ -16,7 +16,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   
   // State 
-  const [activeTab, setActiveTab] = useState('all'); // 'all', 'recent', 'favorites', 'trash', or 'folder_X'
+  const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -27,6 +27,23 @@ export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isNoteListOpen, setIsNoteListOpen] = useState(true);
   const isFocusMode = !isSidebarOpen && !isNoteListOpen;
+
+  // 🌙 Dark Mode — localStorage persistent
+  const [isDark, setIsDark] = useState(() => {
+    return localStorage.getItem('theme') === 'dark';
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => setIsDark(prev => !prev);
 
   const toggleFocusMode = () => {
     if (isFocusMode) {
@@ -78,7 +95,6 @@ export default function Dashboard() {
     try {
       await api.delete(`/folders/${folderId}`);
       setFolders(prev => prev.filter(f => f.id !== folderId));
-      // Nullify folderId on affected notes locally
       setNotes(prev => prev.map(n => n.folderId === folderId ? { ...n, folderId: null } : n));
     } catch {
       alert('Klasör silinirken bir hata oluştu.');
@@ -166,10 +182,10 @@ export default function Dashboard() {
     if (!matchesSearch) return false;
 
     if (activeTab === 'trash') return n.isDeleted;
-    if (n.isDeleted) return false; // Hide deleted from other tabs
+    if (n.isDeleted) return false;
 
     if (activeTab === 'all') return true;
-    if (activeTab === 'recent') return true; // Normally check dates, here all are recent
+    if (activeTab === 'recent') return true;
     if (activeTab === 'favorites') return n.isFavorite;
     if (activeTab.startsWith('folder_')) {
       return n.folderId === parseInt(activeTab.split('_')[1]);
@@ -177,7 +193,6 @@ export default function Dashboard() {
     return true;
   });
 
-  // Sort: Pinned first
   const sortedNotes = [...filteredNotes].sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
     if (!a.isPinned && b.isPinned) return 1;
@@ -187,7 +202,7 @@ export default function Dashboard() {
   const activeNote = notes.find(n => n.id === activeNoteId);
 
   return (
-    <div className="flex h-screen bg-[#F6F7F9] overflow-hidden">
+    <div className="flex h-screen bg-[#F6F7F9] dark:bg-[#0d0d0d] overflow-hidden transition-colors duration-300">
       
       {/* 1. Sidebar — collapsible */}
       <div
@@ -201,13 +216,15 @@ export default function Dashboard() {
           folders={folders} 
           onAddFolder={handleAddFolder} 
           onDeleteFolder={handleDeleteFolder}
-          onLogout={handleLogout} 
+          onLogout={handleLogout}
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
         />
       </div>
 
       {/* 2. List & Grid Area — collapsible */}
       <div
-        className={`flex flex-col bg-[#F3F4F6] shrink-0 border-r border-gray-200 z-10 transition-all duration-300 ease-in-out overflow-hidden ${
+        className={`flex flex-col bg-[#F3F4F6] dark:bg-[#141414] shrink-0 border-r border-gray-200 dark:border-gray-800 z-10 transition-all duration-300 ease-in-out overflow-hidden ${
           isNoteListOpen ? 'w-[480px] opacity-100' : 'w-0 opacity-0'
         }`}
       >
@@ -216,27 +233,27 @@ export default function Dashboard() {
         <div className="px-6 py-6 pb-4 min-w-[480px]">
            {/* Section Title */}
           <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-3xl font-black text-gray-800 tracking-tight capitalize">
+            <h2 className="text-3xl font-black text-gray-800 dark:text-gray-100 tracking-tight capitalize">
               {activeTab === 'all' && 'Tüm Notlar'}
               {activeTab === 'recent' && 'En Yeniler'}
               {activeTab === 'favorites' && 'Favoriler'}
               {activeTab === 'trash' && 'Çöp Kutusu'}
               {activeTab.startsWith('folder_') && folders.find(f => f.id === parseInt(activeTab.split('_')[1]))?.name}
             </h2>
-            <span className="bg-gray-200 text-gray-600 text-sm font-bold px-2 py-0.5 rounded-full">
+            <span className="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm font-bold px-2 py-0.5 rounded-full">
               {sortedNotes.length}
             </span>
           </div>
 
           <div className="flex gap-3">
             <div className="relative flex-1">
-              <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
               <input 
                 type="text" 
                 placeholder="Notlarda ara..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm transition"
+                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm transition"
               />
             </div>
             
@@ -252,11 +269,11 @@ export default function Dashboard() {
         </div>
 
         {/* Real Grid Map */}
-        <div className="flex-1 overflow-y-auto px-6 pb-6 min-w-[480px]">
+        <div className="flex-1 overflow-y-auto px-6 pb-6 pt-1 min-w-[480px]">
           {sortedNotes.length === 0 ? (
             <div className="text-center py-20">
-              <div className="text-gray-400 text-6xl mb-4 opacity-50">📂</div>
-              <p className="text-gray-500 font-medium">Bu liste henüz boş.</p>
+              <div className="text-gray-400 dark:text-gray-600 text-6xl mb-4 opacity-50">📂</div>
+              <p className="text-gray-500 dark:text-gray-400 font-medium">Bu liste henüz boş.</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
@@ -293,10 +310,10 @@ export default function Dashboard() {
           onToggleNoteList={() => setIsNoteListOpen(prev => !prev)}
         />
       ) : (
-        <div className="flex-1 bg-white flex flex-col items-center justify-center border-l border-gray-200">
-          <FileText className="w-24 h-24 text-gray-200 mb-6" />
-          <h2 className="text-2xl font-bold text-gray-400">Not Görüntüleyici</h2>
-          <p className="text-gray-400">Görüntülemek veya düzenlemek için bir not seçin.</p>
+        <div className="flex-1 bg-white dark:bg-[#121212] flex flex-col items-center justify-center border-l border-gray-200 dark:border-gray-800 transition-colors duration-300">
+          <FileText className="w-24 h-24 text-gray-200 dark:text-gray-700 mb-6" />
+          <h2 className="text-2xl font-bold text-gray-400 dark:text-gray-500">Not Görüntüleyici</h2>
+          <p className="text-gray-400 dark:text-gray-500">Görüntülemek veya düzenlemek için bir not seçin.</p>
         </div>
       )}
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Star, Trash2, Folder as FolderIcon, Plus, LogOut, Clock, X } from 'lucide-react';
+import { FileText, Star, Trash2, Folder as FolderIcon, Plus, LogOut, Clock, X, Sun, Moon } from 'lucide-react';
 import type { Folder } from '../types';
 
 interface SidebarProps {
@@ -9,9 +9,11 @@ interface SidebarProps {
   onAddFolder: (name: string) => void;
   onDeleteFolder: (id: number) => void;
   onLogout: () => void;
+  isDark: boolean;
+  onToggleTheme: () => void;
 }
 
-export default function Sidebar({ activeTab, setActiveTab, folders, onAddFolder, onDeleteFolder, onLogout }: SidebarProps) {
+export default function Sidebar({ activeTab, setActiveTab, folders, onAddFolder, onDeleteFolder, onLogout, isDark, onToggleTheme }: SidebarProps) {
   const [isAddingFolder, setIsAddingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
 
@@ -42,11 +44,11 @@ export default function Sidebar({ activeTab, setActiveTab, folders, onAddFolder,
   ];
 
   return (
-    <div className="w-72 bg-gray-50 border-r border-gray-200 flex flex-col h-full shadow-inner z-20">
+    <div className="w-72 bg-gray-50 dark:bg-[#1a1a1a] border-r border-gray-200 dark:border-gray-800 flex flex-col h-full shadow-inner z-20 transition-colors duration-300">
       
       {/* Brand Header */}
-      <div className="p-6 border-b border-gray-200/60 flex items-center justify-between">
-        <h1 className="text-xl font-bold tracking-tight text-gray-800 flex items-center gap-2">
+      <div className="p-6 border-b border-gray-200/60 dark:border-gray-800 flex items-center justify-between">
+        <h1 className="text-xl font-bold tracking-tight text-gray-800 dark:text-gray-100 flex items-center gap-2">
           <FileText className="w-6 h-6 text-blue-500" /> 
           iNotes
         </h1>
@@ -61,11 +63,11 @@ export default function Sidebar({ activeTab, setActiveTab, folders, onAddFolder,
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-all duration-200 ${
                 activeTab === item.id 
-                  ? 'bg-white text-blue-600 shadow-sm' 
-                  : 'text-gray-600 hover:bg-gray-200/50 hover:text-gray-900'
+                  ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm' 
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
             >
-              <div className={activeTab === item.id ? 'text-blue-500' : 'text-gray-400'}>
+              <div className={activeTab === item.id ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}>
                 {item.icon}
               </div>
               {item.label}
@@ -75,7 +77,7 @@ export default function Sidebar({ activeTab, setActiveTab, folders, onAddFolder,
 
         {/* Folders Section */}
         <div>
-          <h3 className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Klasörler</h3>
+          <h3 className="px-3 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Klasörler</h3>
           <nav className="space-y-1">
             {folders.map(folder => (
               <div 
@@ -86,8 +88,8 @@ export default function Sidebar({ activeTab, setActiveTab, folders, onAddFolder,
                   onClick={() => setActiveTab(`folder_${folder.id}`)}
                   className={`flex-1 flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
                     activeTab === `folder_${folder.id}` 
-                      ? 'bg-blue-100/80 text-blue-700 shadow-sm ring-1 ring-blue-200' 
-                      : 'text-gray-600 hover:bg-gray-200/50 hover:text-gray-900'
+                      ? 'bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 shadow-sm ring-1 ring-blue-200 dark:ring-blue-800' 
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
                   }`}
                 >
                   <FolderIcon className="w-4 h-4 text-blue-400" />
@@ -95,7 +97,7 @@ export default function Sidebar({ activeTab, setActiveTab, folders, onAddFolder,
                 </button>
                 <button
                   onClick={(e) => handleDeleteFolder(e, folder.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1.5 ml-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all duration-200"
+                  className="opacity-0 group-hover:opacity-100 p-1.5 ml-1 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-all duration-200"
                   title="Klasörü Sil"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -111,14 +113,14 @@ export default function Sidebar({ activeTab, setActiveTab, folders, onAddFolder,
                   value={newFolderName}
                   onChange={(e) => setNewFolderName(e.target.value)}
                   placeholder="Klasör adı..."
-                  className="w-full text-sm py-1.5 px-3 border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                  className="w-full text-sm py-1.5 px-3 border border-blue-300 dark:border-blue-700 rounded bg-white dark:bg-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
                   onBlur={() => !newFolderName && setIsAddingFolder(false)}
                 />
               </form>
             ) : (
               <button 
                 onClick={() => setIsAddingFolder(true)}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-200/50 transition-colors mt-1"
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-200/50 dark:hover:bg-gray-800/50 transition-colors mt-1"
               >
                 <Plus className="w-4 h-4" /> Klasör Ekle
               </button>
@@ -128,10 +130,17 @@ export default function Sidebar({ activeTab, setActiveTab, folders, onAddFolder,
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200/60">
+      <div className="p-4 border-t border-gray-200/60 dark:border-gray-800 space-y-1">
+        <button 
+          onClick={onToggleTheme}
+          className="w-full flex items-center justify-center gap-3 px-3 py-2.5 rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+          title={isDark ? 'Aydınlık Mod' : 'Gece Modu'}
+        >
+          {isDark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5" />}
+        </button>
         <button 
           onClick={onLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-colors"
         >
           <LogOut className="w-5 h-5 opacity-70" />
           Çıkış Yap
