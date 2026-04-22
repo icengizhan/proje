@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, FileText } from 'lucide-react';
+import { Search, Plus, FileText, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
@@ -22,6 +22,21 @@ export default function Dashboard() {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNoteId, setActiveNoteId] = useState<number | null>(null);
+
+  // Focus Mode states
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isNoteListOpen, setIsNoteListOpen] = useState(true);
+  const isFocusMode = !isSidebarOpen && !isNoteListOpen;
+
+  const toggleFocusMode = () => {
+    if (isFocusMode) {
+      setIsSidebarOpen(true);
+      setIsNoteListOpen(true);
+    } else {
+      setIsSidebarOpen(false);
+      setIsNoteListOpen(false);
+    }
+  };
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -174,21 +189,31 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-[#F6F7F9] overflow-hidden">
       
-      {/* 1. Sidebar */}
-      <Sidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        folders={folders} 
-        onAddFolder={handleAddFolder} 
-        onDeleteFolder={handleDeleteFolder}
-        onLogout={handleLogout} 
-      />
+      {/* 1. Sidebar — collapsible */}
+      <div
+        className={`shrink-0 transition-all duration-300 ease-in-out overflow-hidden ${
+          isSidebarOpen ? 'w-72 opacity-100' : 'w-0 opacity-0'
+        }`}
+      >
+        <Sidebar 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          folders={folders} 
+          onAddFolder={handleAddFolder} 
+          onDeleteFolder={handleDeleteFolder}
+          onLogout={handleLogout} 
+        />
+      </div>
 
-      {/* 2. List & Grid Area */}
-      <div className="w-[480px] flex flex-col bg-[#F3F4F6] shrink-0 border-r border-gray-200 z-10 transition-all">
+      {/* 2. List & Grid Area — collapsible */}
+      <div
+        className={`flex flex-col bg-[#F3F4F6] shrink-0 border-r border-gray-200 z-10 transition-all duration-300 ease-in-out overflow-hidden ${
+          isNoteListOpen ? 'w-[480px] opacity-100' : 'w-0 opacity-0'
+        }`}
+      >
         
         {/* Header toolbar */}
-        <div className="px-6 py-6 pb-4">
+        <div className="px-6 py-6 pb-4 min-w-[480px]">
            {/* Section Title */}
           <div className="flex items-center gap-3 mb-6">
             <h2 className="text-3xl font-black text-gray-800 tracking-tight capitalize">
@@ -227,7 +252,7 @@ export default function Dashboard() {
         </div>
 
         {/* Real Grid Map */}
-        <div className="flex-1 overflow-y-auto px-6 pb-6">
+        <div className="flex-1 overflow-y-auto px-6 pb-6 min-w-[480px]">
           {sortedNotes.length === 0 ? (
             <div className="text-center py-20">
               <div className="text-gray-400 text-6xl mb-4 opacity-50">📂</div>
@@ -260,6 +285,12 @@ export default function Dashboard() {
           onRestore={restoreNote}
           onTrash={moveToTrash}
           onLinkClick={handleWikiLink}
+          isFocusMode={isFocusMode}
+          onToggleFocusMode={toggleFocusMode}
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+          isNoteListOpen={isNoteListOpen}
+          onToggleNoteList={() => setIsNoteListOpen(prev => !prev)}
         />
       ) : (
         <div className="flex-1 bg-white flex flex-col items-center justify-center border-l border-gray-200">

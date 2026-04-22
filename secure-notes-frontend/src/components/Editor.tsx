@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import type { ChangeEvent } from 'react';
-import { PenTool, Highlighter, Type, Download, Image as ImageIcon, FilePlus, RefreshCcw, Trash2, ExternalLink, Eye, Edit3, AlertTriangle } from 'lucide-react';
+import { PenTool, Highlighter, Download, Image as ImageIcon, RefreshCcw, Trash2, ExternalLink, Eye, Edit3, AlertTriangle, PanelLeftClose, PanelLeftOpen, Maximize, Minimize } from 'lucide-react';
 import type { Note, PaperType, PaperColor } from '../types';
 import api from '../api/axios';
 
@@ -11,6 +11,12 @@ interface EditorProps {
   onRestore: (id: number) => void;
   onTrash: (id: number) => void;
   onLinkClick?: (linkName: string) => void;
+  isFocusMode?: boolean;
+  onToggleFocusMode?: () => void;
+  isSidebarOpen?: boolean;
+  onToggleSidebar?: () => void;
+  isNoteListOpen?: boolean;
+  onToggleNoteList?: () => void;
 }
 
 // Image error fallback component
@@ -39,7 +45,7 @@ function ImageWithFallback({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export default function Editor({ note, onUpdate, onDeletePermanently, onRestore, onTrash, onLinkClick }: EditorProps) {
+export default function Editor({ note, onUpdate, onDeletePermanently, onRestore, onTrash, onLinkClick, isFocusMode, onToggleFocusMode, isSidebarOpen, onToggleSidebar, isNoteListOpen, onToggleNoteList }: EditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const skipSaveId = useRef<number | null>(null);
@@ -210,8 +216,26 @@ export default function Editor({ note, onUpdate, onDeletePermanently, onRestore,
       {/* 🛠️ Top Toolbar */}
       <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100 shrink-0 bg-white/95 backdrop-blur-md">
         
-        {/* Drawing & Text Tools + Preview Toggle */}
+        {/* Panel Controls + Preview Toggle */}
         <div className="flex items-center gap-3">
+          {/* Focus Mode Controls */}
+          <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-xl">
+            <button
+              onClick={onToggleSidebar}
+              className={`p-2 rounded-lg transition ${!isSidebarOpen ? 'text-orange-500 bg-orange-50' : 'text-gray-400 hover:text-gray-800 hover:bg-gray-200'}`}
+              title={isSidebarOpen ? 'Menüyü Gizle' : 'Menüyü Göster'}
+            >
+              {isSidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
+            </button>
+            <button
+              onClick={onToggleFocusMode}
+              className={`p-2 rounded-lg transition ${isFocusMode ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-800 hover:bg-gray-200'}`}
+              title={isFocusMode ? 'Odak Modundan Çık' : 'Odak Modu'}
+            >
+              {isFocusMode ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+            </button>
+          </div>
+
           <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-xl">
             <button
               onClick={() => setIsPreview(false)}
