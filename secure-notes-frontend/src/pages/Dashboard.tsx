@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, FileText, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Search, Plus, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
@@ -321,8 +321,6 @@ export default function Dashboard() {
           onToggleFocusMode={toggleFocusMode}
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
-          isNoteListOpen={isNoteListOpen}
-          onToggleNoteList={() => setIsNoteListOpen(prev => !prev)}
         />
       ) : (
         <div className="flex-1 bg-white dark:bg-[#121212] flex flex-col items-center justify-center border-l border-gray-200 dark:border-gray-800 transition-colors duration-300">

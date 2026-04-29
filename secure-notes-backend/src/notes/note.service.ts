@@ -10,6 +10,13 @@ import { UserEntity } from '../users/user.entity';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 
+export interface SharedNotePayload {
+  title: string;
+  content: string;
+  created_at: Date;
+  public_slug: string;
+}
+
 @Injectable()
 export class NoteService {
   constructor(
@@ -21,17 +28,30 @@ export class NoteService {
   async getUserNotes(user: UserEntity): Promise<NoteEntity[]> {
     return this.noteRepository.find({
       where: { user: { id: user.id } },
-      order: { updated_at: 'DESC' }
+      order: { updated_at: 'DESC' },
     });
   }
 
   async createNote(user: UserEntity, dto: CreateNoteDto): Promise<NoteEntity> {
-    const { title, content, is_public, folderId, isPinned, isDeleted, isLocked, isFavorite, paperType, paperColor } = dto;
+    const {
+      title,
+      content,
+      is_public,
+      folderId,
+      isPinned,
+      isDeleted,
+      isLocked,
+      isFavorite,
+      paperType,
+      paperColor,
+    } = dto;
 
-    const sanitizedContent = content ? sanitizeHtml(content, {
-      allowedTags: ['b', 'i', 'em', 'strong', 'p', 'br', 'ul', 'ol', 'li'],
-      allowedAttributes: {}, 
-    }) : '';
+    const sanitizedContent = content
+      ? sanitizeHtml(content, {
+          allowedTags: ['b', 'i', 'em', 'strong', 'p', 'br', 'ul', 'ol', 'li'],
+          allowedAttributes: {},
+        })
+      : '';
 
     const public_slug = is_public ? uuidv4() : undefined;
 
@@ -59,21 +79,27 @@ export class NoteService {
     return savedNote;
   }
 
-  async updateNote(user: UserEntity, noteId: number, dto: UpdateNoteDto): Promise<NoteEntity> {
-    const note = await this.noteRepository.findOne({ where: { id: noteId, user: { id: user.id } } });
+  async updateNote(
+    user: UserEntity,
+    noteId: number,
+    dto: UpdateNoteDto,
+  ): Promise<NoteEntity> {
+    const note = await this.noteRepository.findOne({
+      where: { id: noteId, user: { id: user.id } },
+    });
     if (!note) {
       throw new NotFoundException('Not bulunamadı');
     }
-    
+
     if (dto.content !== undefined) {
       dto.content = sanitizeHtml(dto.content, {
         allowedTags: ['b', 'i', 'em', 'strong', 'p', 'br', 'ul', 'ol', 'li'],
-        allowedAttributes: {}, 
+        allowedAttributes: {},
       });
     }
 
     Object.assign(note, dto);
-    
+
     if (note.is_public && !note.public_slug) {
       note.public_slug = uuidv4();
     } else if (!note.is_public) {
@@ -84,10 +110,10 @@ export class NoteService {
     return savedNote;
   }
 
-  async getNoteBySlug(slug: string): Promise<any> {
+  async getNoteBySlug(slug: string): Promise<SharedNotePayload> {
     const cacheKey = `note:public:${slug}`;
-    
-    const cachedNote = await this.cacheManager.get(cacheKey);
+
+    const cachedNote = await this.cacheManager.get<SharedNotePayload>(cacheKey);
     if (cachedNote) {
       return cachedNote;
     }

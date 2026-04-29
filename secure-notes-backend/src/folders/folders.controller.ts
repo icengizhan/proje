@@ -1,10 +1,21 @@
-import { Controller, Post, Get, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { FoldersService } from './folders.service';
 import { CreateFolderDto } from './dto/create-folder.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UserEntity } from '../users/user.entity';
 
+import { ApiTags } from '@nestjs/swagger';
+
+@ApiTags('folders')
 @Controller('folders')
 export class FoldersController {
   constructor(private readonly foldersService: FoldersService) {}
@@ -26,10 +37,7 @@ export class FoldersController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async deleteFolder(
-    @CurrentUser() user: UserEntity,
-    @Param('id') id: string,
-  ) {
+  async deleteFolder(@CurrentUser() user: UserEntity, @Param('id') id: string) {
     await this.foldersService.deleteFolder(user, parseInt(id, 10));
     return { message: 'Klasör silindi' };
   }

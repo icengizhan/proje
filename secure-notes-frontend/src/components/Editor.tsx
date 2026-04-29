@@ -15,8 +15,6 @@ interface EditorProps {
   onToggleFocusMode?: () => void;
   isSidebarOpen?: boolean;
   onToggleSidebar?: () => void;
-  isNoteListOpen?: boolean;
-  onToggleNoteList?: () => void;
 }
 
 // Image error fallback component
@@ -44,7 +42,7 @@ function ImageWithFallback({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-export default function Editor({ note, onUpdate, onDeletePermanently, onRestore, onTrash, onLinkClick, isFocusMode, onToggleFocusMode, isSidebarOpen, onToggleSidebar, isNoteListOpen, onToggleNoteList }: EditorProps) {
+export default function Editor({ note, onUpdate, onDeletePermanently, onRestore, onTrash, onLinkClick, isFocusMode, onToggleFocusMode, isSidebarOpen, onToggleSidebar }: EditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const skipSaveId = useRef<number | null>(null);
@@ -312,6 +310,11 @@ export default function Editor({ note, onUpdate, onDeletePermanently, onRestore,
                 if (e.key === 'Enter') {
                   e.preventDefault();
                   textareaRef.current?.focus();
+                }
+              }}
+              onFocus={(e) => {
+                if (e.target.value === 'Yeni Not') {
+                  e.target.select();
                 }
               }}
               readOnly={isPreview}

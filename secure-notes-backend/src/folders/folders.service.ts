@@ -21,7 +21,10 @@ export class FoldersService {
     });
   }
 
-  async createFolder(user: UserEntity, dto: CreateFolderDto): Promise<FolderEntity> {
+  async createFolder(
+    user: UserEntity,
+    dto: CreateFolderDto,
+  ): Promise<FolderEntity> {
     const newFolder = this.folderRepository.create({
       name: dto.name,
       user,

@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -24,7 +28,7 @@ export class AuthService {
       throw new ConflictException('Email veya username zaten kullanılıyor.');
     }
 
-    const password_hash = await bcrypt.hash(password, 12); 
+    const password_hash = await bcrypt.hash(password, 12);
 
     const user = this.userRepository.create({
       email,
@@ -33,8 +37,8 @@ export class AuthService {
     });
 
     const savedUser = await this.userRepository.save(user);
-    
-    const { password_hash: _ph, ...safeUser } = savedUser; 
+
+    const { password_hash: _, ...safeUser } = savedUser; // eslint-disable-line @typescript-eslint/no-unused-vars
 
     const payload = { userId: savedUser.id };
     return {
@@ -61,8 +65,8 @@ export class AuthService {
       throw new UnauthorizedException('Geçersiz kimlik bilgileri');
     }
 
-    const { password_hash: _ph, ...safeUser } = user;
-    
+    const { password_hash: _, ...safeUser } = user; // eslint-disable-line @typescript-eslint/no-unused-vars
+
     const payload = { userId: user.id };
     return {
       access_token: this.jwtService.sign(payload),

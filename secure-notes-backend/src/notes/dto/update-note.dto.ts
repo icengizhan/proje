@@ -1,4 +1,10 @@
-import { IsString, MaxLength, IsBoolean, IsOptional, IsNumber } from 'class-validator';
+import {
+  IsString,
+  MaxLength,
+  IsBoolean,
+  IsOptional,
+  IsNumber,
+} from 'class-validator';
 
 export class UpdateNoteDto {
   @IsOptional()
