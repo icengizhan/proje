@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NoteService } from './note.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { NoteEntity } from './note.entity';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 describe('NoteService', () => {
   let service: NoteService;
@@ -12,12 +13,18 @@ describe('NoteService', () => {
     findOne: jest.fn(),
     delete: jest.fn(),
   };
+  const mockCacheManager = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         NoteService,
         { provide: getRepositoryToken(NoteEntity), useValue: mockNoteRepo },
+        { provide: CACHE_MANAGER, useValue: mockCacheManager },
       ],
     }).compile();
 
