@@ -10,13 +10,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly configService: ConfigService,
     private readonly authService: AuthService,
   ) {
+    const secret = configService.get<string>('JWT_SECRET');
+    if (!secret || secret.length < 32) {
+      throw new Error(
+        'FATAL: JWT_SECRET tanımlı değil veya 32 karakterden kısa',
+      );
+    }
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>(
-        'JWT_SECRET',
-        'defaultSecretFallback',
-      ),
+      secretOrKey: secret,
     });
   }
 

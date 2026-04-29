@@ -39,7 +39,7 @@ services:
       - DB_DATABASE=secure_notes
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - JWT_SECRET=supersecret
+      - JWT_SECRET=k8Xp2sN7vQ4wL9mR3jF6hB1dY5cA0eT8uG2iO7lZ4xW9nK3pJ6qM1bV5fH8yD
     depends_on:
       - mysql
       - redis

@@ -49,10 +49,10 @@ export default function Sidebar({ activeTab, setActiveTab, folders, onAddFolder,
     <div className="w-72 bg-gray-50 dark:bg-[#1a1a1a] border-r border-gray-200 dark:border-gray-800 flex flex-col h-full shadow-inner z-20 transition-colors duration-300">
       
       {/* Brand Header */}
-      <div className="p-6 border-b border-gray-200/60 dark:border-gray-800 flex items-center justify-between">
-        <h1 className="text-xl font-bold tracking-tight text-gray-800 dark:text-gray-100 flex items-center gap-2">
-          <FileText className="w-6 h-6 text-blue-500" /> 
-          iNotes
+      <div className="px-4 py-6 border-b border-gray-200/60 dark:border-gray-800">
+        <h1 className="text-lg font-bold tracking-tight text-gray-800 dark:text-gray-100 flex items-center gap-2 whitespace-nowrap">
+          <FileText className="w-5 h-5 text-blue-500 shrink-0" />
+          <span>Secure<span className="text-blue-500">Notes</span></span>
         </h1>
       </div>
 

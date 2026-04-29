@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -14,15 +14,20 @@ import { UsersModule } from '../users/users.module';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>(
-          'JWT_SECRET',
-          'defaultSecretFallback',
-        ),
-        signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN', '7d') as any,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_SECRET');
+        if (!secret || secret.length < 32) {
+          throw new Error(
+            'FATAL: JWT_SECRET tanımlı değil veya 32 karakterden kısa',
+          );
+        }
+        return {
+          secret,
+          signOptions: {
+            expiresIn: configService.get<string>('JWT_EXPIRES_IN', '7d') as JwtSignOptions['expiresIn'],
+          },
+        };
+      },
     }),
   ],
   controllers: [AuthController],

@@ -27,7 +27,8 @@ import { HealthModule } from './health/health.module';
         password: configService.get<string>('DB_PASSWORD', ''),
         database: configService.get<string>('DB_DATABASE', 'secure_notes'),
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize: configService.get<string>('NODE_ENV') !== 'production',
+        migrationsRun: configService.get<string>('NODE_ENV') === 'production',
       }),
     }),
     ThrottlerModule.forRoot([
